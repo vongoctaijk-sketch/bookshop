@@ -44,7 +44,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/chi-tiet-hoa-don/**").hasAuthority(Permission.CHI_TIET_HOA_DON_CREATE)
                         .requestMatchers(HttpMethod.PUT, "/api/chi-tiet-hoa-don/**").hasAuthority(Permission.CHI_TIET_HOA_DON_UPDATE)
                         .requestMatchers(HttpMethod.DELETE, "/api/chi-tiet-hoa-don/**").hasAuthority(Permission.CHI_TIET_HOA_DON_DELETE)
-                        .requestMatchers(HttpMethod.GET, "/api/chi-tiet-phieu-giu/**").hasAuthority(Permission.CHI_TIET_PHIEU_GIU_READ)
+                        .requestMatchers(HttpMethod.GET, "/api/chi-tiet-phieu-giu/*" +
+                                "*").hasAuthority(Permission.CHI_TIET_PHIEU_GIU_READ)
                         .requestMatchers(HttpMethod.POST, "/api/chi-tiet-phieu-giu/**").hasAuthority(Permission.CHI_TIET_PHIEU_GIU_CREATE)
                         .requestMatchers(HttpMethod.PUT, "/api/chi-tiet-phieu-giu/**").hasAuthority(Permission.CHI_TIET_PHIEU_GIU_UPDATE)
                         .requestMatchers(HttpMethod.DELETE, "/api/chi-tiet-phieu-giu/**").hasAuthority(Permission.CHI_TIET_PHIEU_GIU_DELETE)

@@ -1,19 +1,52 @@
 import api from "../config/axios";
 
 const sachService = {
-  // Lấy danh sách + tìm kiếm + lọc + phân trang
-  getAll: (params) => api.get("/sach/search", { params }),
+  getAll: (params) => {
+    if (params && Object.keys(params).length > 0) {
+      return api.get("/sach/search", { params });
+    }
 
-  // Lấy sách theo ID
+    return api.get("/sach");
+  },
+
+  gettop3: () => api.get("/sach/top-ban-chay"),
+
   getById: (id) => api.get(`/sach/${id}`),
 
-  // Thêm sách
   create: (data) => api.post("/sach", data),
 
-  // Cập nhật sách
+  createWithImage: (payload, file) => {
+    const formData = new FormData();
+    formData.append("sach", JSON.stringify(payload));
+
+    if (file) {
+      formData.append("fileAnh", file);
+    }
+
+    return api.post("/sach", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+  },
+
   update: (id, data) => api.put(`/sach/${id}`, data),
 
-  // Xóa sách
+  updateWithImage: (id, payload, file) => {
+    const formData = new FormData();
+    formData.append("sach", JSON.stringify(payload));
+
+    if (file) {
+      formData.append("fileAnh", file);
+    }
+
+    return api.put(`/sach/${id}`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+  },
+
   delete: (id) => api.delete(`/sach/${id}`),
 };
 

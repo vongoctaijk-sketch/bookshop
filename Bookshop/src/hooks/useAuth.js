@@ -22,13 +22,14 @@ import {
  * Hook để sử dụng authentication state
  */
 export const useAuthState = () => {
-  const { user, token, isAuthenticated, loading, error } = useSelector(
+  const { user, accessToken, isAuthenticated, loading, error } = useSelector(
     (state) => state.auth,
   );
 
   return {
     user,
-    token,
+    token: accessToken,
+    accessToken,
     isAuthenticated,
     loading,
     error,
@@ -45,12 +46,12 @@ export const useLoginMutation = () => {
     mutationFn: async (credentials) => {
       dispatch(loginStart());
       try {
-        const response = await authAPI.login(
+        const payload = await authAPI.login(
           credentials.username,
           credentials.password,
         );
-        dispatch(loginSuccess(response));
-        return response;
+        dispatch(loginSuccess(payload));
+        return payload;
       } catch (error) {
         const errorMessage =
           error.response?.data?.message || "Đăng nhập thất bại";
@@ -77,9 +78,9 @@ export const useRegisterMutation = () => {
     mutationFn: async (formData) => {
       dispatch(registerStart());
       try {
-        const response = await authAPI.register(formData);
-        dispatch(registerSuccess(response));
-        return response;
+        const payload = await authAPI.register(formData);
+        dispatch(registerSuccess(payload));
+        return payload;
       } catch (error) {
         const errorMessage =
           error.response?.data?.message || "Đăng ký thất bại";
@@ -130,9 +131,9 @@ export const useGetCurrentUser = () => {
     queryFn: async () => {
       dispatch(getCurrentUserStart());
       try {
-        const response = await authAPI.getCurrentUser();
-        dispatch(getCurrentUserSuccess(response.user));
-        return response.user;
+        const payload = await authAPI.getCurrentUser();
+        dispatch(getCurrentUserSuccess(payload));
+        return payload;
       } catch (error) {
         dispatch(
           getCurrentUserFailure(
@@ -158,9 +159,9 @@ export const useUpdateProfileMutation = () => {
     mutationFn: async (profileData) => {
       dispatch(updateProfileStart());
       try {
-        const response = await authAPI.updateProfile(profileData);
-        dispatch(updateProfileSuccess(response.user));
-        return response;
+        const payload = await authAPI.updateProfile(profileData);
+        dispatch(updateProfileSuccess(payload.user ?? payload));
+        return payload;
       } catch (error) {
         dispatch(
           updateProfileFailure(
@@ -185,11 +186,10 @@ export const useUpdateProfileMutation = () => {
 export const useChangePasswordMutation = () => {
   return useMutation({
     mutationFn: async (passwords) => {
-      const response = await authAPI.changePassword(
+      return authAPI.changePassword(
         passwords.currentPassword,
         passwords.newPassword,
       );
-      return response;
     },
     onSuccess: (data) => {
       console.log("Password changed successfully:", data);
@@ -206,8 +206,7 @@ export const useChangePasswordMutation = () => {
 export const useForgotPasswordMutation = () => {
   return useMutation({
     mutationFn: async (username) => {
-      const response = await authAPI.forgotPassword(username);
-      return response;
+      return authAPI.forgotPassword(username);
     },
     onSuccess: (data) => {
       console.log("Password reset email sent:", data);

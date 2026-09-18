@@ -16,6 +16,7 @@ public class SachDto {
 
     private Integer id;
     private String tenSach;
+    private String moTa;
     private BigDecimal giaBan;
     private Integer soLuongTon;
     private String hinhAnh;

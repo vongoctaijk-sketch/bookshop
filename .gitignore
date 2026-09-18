@@ -22,7 +22,7 @@ target/
 .env.*
 application-local.properties
 application-local.yml
-
+application.properties
 # =========================
 # Frontend - React / Vite
 # =========================

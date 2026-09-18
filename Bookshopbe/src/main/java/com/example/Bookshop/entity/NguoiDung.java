@@ -46,10 +46,8 @@ public class NguoiDung {
     @Column(name = "dia_chi")
     private String diaChi;
 
-    @OneToOne
-    @JoinColumn(name = "khach_hang_id", unique = true)
-    @JsonIgnoreProperties({"hoaDons", "phieuDatGiuSachs"})
-    private KhachHang khachHang;
+
+
 
     @ManyToOne
     @JoinColumn(name = "ten_nhom")
@@ -57,7 +55,7 @@ public class NguoiDung {
     private NhomNguoiDung nhomNguoiDung;
 
     @OneToMany(mappedBy = "nguoiDung")
-    @JsonIgnoreProperties({"nguoiDung", "khachHang", "danhSachChiTiet"})
+    @JsonIgnoreProperties({"nguoiDung", "danhSachChiTiet"})
     private List<HoaDon> hoaDons;
 
     @OneToMany(mappedBy = "nguoiDung")

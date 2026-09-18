@@ -36,10 +36,21 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+
+                        .requestMatchers("/api/nguoi-dung/**").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/auth/me").authenticated()
                         .requestMatchers("/api/auth/register", "/api/auth/login", "/api/auth/refresh", "/api/auth/logout").permitAll()
+                        .requestMatchers("/api/ai/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+
+                        // Public shop read endpoints
+                        .requestMatchers(HttpMethod.POST, "/api/nguoi-dung/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/sach/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/the-loai/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/tac-gia/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/nha-xuat-ban/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/nha-cung-cap/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/chi-tiet-hoa-don/**").hasAuthority(Permission.CHI_TIET_HOA_DON_READ)
                         .requestMatchers(HttpMethod.POST, "/api/chi-tiet-hoa-don/**").hasAuthority(Permission.CHI_TIET_HOA_DON_CREATE)
                         .requestMatchers(HttpMethod.PUT, "/api/chi-tiet-hoa-don/**").hasAuthority(Permission.CHI_TIET_HOA_DON_UPDATE)
@@ -58,7 +69,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/api/chuc-nang/**").hasAuthority(Permission.CHUC_NANG_UPDATE)
                         .requestMatchers(HttpMethod.DELETE, "/api/chuc-nang/**").hasAuthority(Permission.CHUC_NANG_DELETE)
                         .requestMatchers(HttpMethod.GET, "/api/hoa-don/**").hasAuthority(Permission.HOA_DON_READ)
-                        .requestMatchers(HttpMethod.POST, "/api/hoa-don/**").hasAuthority(Permission.HOA_DON_CREATE)
+                        .requestMatchers(HttpMethod.POST, "/api/hoa-don/**").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/api/hoa-don/**").hasAuthority(Permission.HOA_DON_UPDATE)
                         .requestMatchers(HttpMethod.DELETE, "/api/hoa-don/**").hasAuthority(Permission.HOA_DON_DELETE)
                         .requestMatchers(HttpMethod.GET, "/api/khach-hang/**").hasAuthority(Permission.KHACH_HANG_READ)
@@ -66,7 +77,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/api/khach-hang/**").hasAuthority(Permission.KHACH_HANG_UPDATE)
                         .requestMatchers(HttpMethod.DELETE, "/api/khach-hang/**").hasAuthority(Permission.KHACH_HANG_DELETE)
                         .requestMatchers(HttpMethod.GET, "/api/nguoi-dung/**").hasAuthority(Permission.NGUOI_DUNG_READ)
-                        .requestMatchers(HttpMethod.POST, "/api/nguoi-dung/**").hasAuthority(Permission.NGUOI_DUNG_CREATE)
+
                         .requestMatchers(HttpMethod.PUT, "/api/nguoi-dung/**").hasAuthority(Permission.NGUOI_DUNG_UPDATE)
                         .requestMatchers(HttpMethod.DELETE, "/api/nguoi-dung/**").hasAuthority(Permission.NGUOI_DUNG_DELETE)
                         .requestMatchers(HttpMethod.GET, "/api/nha-cung-cap/**").hasAuthority(Permission.NHA_CUNG_CAP_READ)

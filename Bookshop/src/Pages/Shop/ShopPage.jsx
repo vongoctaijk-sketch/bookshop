@@ -2,160 +2,12 @@ import React from "react";
 import { useState } from "react";
 import { Pagination } from "antd";
 import { Button } from "antd";
-import { FilterOutlined, StarFilled } from "@ant-design/icons";
+import { FilterOutlined } from "@ant-design/icons";
+import { useQuery } from "@tanstack/react-query";
 import { useCart } from "./CartContext";
-import { useNavigate } from "react-router-dom";
-import CartDrawer from "./CartDrawer";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import sachService from "../../services/Sachservice";
 import theloaiService from "../../services/Theloaiservice";
-import { useSearchParams } from "react-router-dom";
-
-// Mock data dựa trên hình ảnh
-
-const books = [
-  {
-    id: 1,
-    title: "The Midnight Library",
-    author: "Matt Haig",
-    rating: 4.8,
-    price: "£18.99",
-    image:
-      "https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=400",
-    lowStock: false,
-  },
-  {
-    id: 2,
-    title: "Sapiens: A Brief History",
-    author: "Yuval Noah Harari",
-    rating: 4.7,
-    price: "£22.50",
-    image:
-      "https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&q=80&w=400",
-    lowStock: false,
-  },
-  {
-    id: 3,
-    title: "The Name of the Rose",
-    author: "Umberto Eco",
-    rating: 4.6,
-    price: "£16.75",
-    image:
-      "https://images.unsplash.com/photo-1589998059171-989d887dda6e?auto=format&fit=crop&q=80&w=400",
-    lowStock: true,
-  },
-  {
-    id: 4,
-    title: "Dune",
-    author: "Frank Herbert",
-    rating: 4.9,
-    price: "£19.99",
-    image:
-      "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=400",
-    lowStock: false,
-  },
-  {
-    id: 5,
-    title: "Educated",
-    author: "Tara Westover",
-    rating: 4.8,
-    price: "£17.99",
-    image:
-      "https://images.unsplash.com/photo-1589829085413-56de8ae18c73?auto=format&fit=crop&q=80&w=400",
-    lowStock: false,
-  },
-  {
-    id: 6,
-    title: "The Silk Roads",
-    author: "Peter Frankopan",
-    rating: 4.5,
-    price: "£21.00",
-    image:
-      "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80&w=400",
-    lowStock: false,
-  },
-  {
-    id: 7,
-    title: "The Silk Roads",
-    author: "Peter Frankopan",
-    rating: 4.5,
-    price: "£21.00",
-    image:
-      "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80&w=400",
-    lowStock: false,
-  },
-  {
-    id: 8,
-    title: "The Silk Roads",
-    author: "Peter Frankopan",
-    rating: 4.5,
-    price: "£21.00",
-    image:
-      "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80&w=400",
-    lowStock: false,
-  },
-  {
-    id: 9,
-    title: "The Silk Roads",
-    author: "Peter Frankopan",
-    rating: 4.5,
-    price: "£21.00",
-    image:
-      "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80&w=400",
-    lowStock: false,
-  },
-  {
-    id: 10,
-    title: "The Silk Roads",
-    author: "Peter Frankopan",
-    rating: 4.5,
-    price: "£21.00",
-    image:
-      "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80&w=400",
-    lowStock: false,
-  },
-  {
-    id: 11,
-    title: "The Silk Roads",
-    author: "Peter Frankopan",
-    rating: 4.5,
-    price: "£21.00",
-    image:
-      "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80&w=400",
-    lowStock: false,
-  },
-];
-const books2 = [
-  {
-    id: 1,
-    title: "The Midnight Library",
-    author: "Matt Haig",
-    rating: 4.8,
-    price: "£18.99",
-    image:
-      "https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=400",
-    lowStock: false,
-  },
-  {
-    id: 2,
-    title: "Sapiens: A Brief History",
-    author: "Yuval Noah Harari",
-    rating: 4.7,
-    price: "£22.50",
-    image:
-      "https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&q=80&w=400",
-    lowStock: false,
-  },
-  {
-    id: 3,
-    title: "The Name of the Rose",
-    author: "Umberto Eco",
-    rating: 4.6,
-    price: "£16.75",
-    image:
-      "https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=400",
-    lowStock: false,
-  },
-];
 
 function ShopPage() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -167,15 +19,17 @@ function ShopPage() {
   const categories = [{ id: null, tenTheLoai: "All" }, ...theloaidata];
   const [searchParams] = useSearchParams();
   const keyword = searchParams.get("keyword") || "";
-  const startIndex = (currentPage - 1) * pageSize;
-  const currentBooks = books.slice(startIndex, startIndex + pageSize);
   const navigate = useNavigate();
   const [totalBooks, setTotalBooks] = useState(0);
+  const { data: books2 = [] } = useQuery({
+    queryKey: ["top3Books"],
+    queryFn: async () => sachService.gettop3(),
+  });
   React.useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await theloaiService.getAll();
-        setTheloaidata(response.data);
+        const payload = await theloaiService.getAll();
+        setTheloaidata(payload || []);
       } catch (error) {
         console.error("Error fetching categories:", error);
       }
@@ -186,15 +40,15 @@ function ShopPage() {
   React.useEffect(() => {
     const fetchBooks = async () => {
       try {
-        const response = await sachService.getAll({
+        const payload = await sachService.getAll({
           keyword,
           theLoaiId: theloai.id,
           page: currentPage - 1,
           size: pageSize,
         });
 
-        setBookdata(response.data.content);
-        setTotalBooks(response.data.totalElements);
+        setBookdata(payload?.content || []);
+        setTotalBooks(payload?.totalElements || 0);
       } catch (error) {
         console.error("Error fetching books:", error);
       }
@@ -203,8 +57,21 @@ function ShopPage() {
     fetchBooks();
   }, [keyword, theloai.id, currentPage]);
   const handleBookClick = (book) => {
-    // Điều hướng sang trang chi tiết và kẹp toàn bộ object book vào state
-    navigate(`/books/${book.id}`, { state: { bookData: book } });
+    const bookData = {
+      ...book,
+      title: book.tenSach,
+      image: book.hinhAnh,
+      price: Number(book.giaBan ?? 0),
+      author:
+        book.tacGias?.map((t) => t.hoTen || t.tenTacGia || t.name).join(", ") ||
+        "Chưa cập nhật",
+      publisher: book.nhaXuatBan?.tenNxb || "Chưa cập nhật",
+      year: book.namXuatBan || "Chưa cập nhật",
+      pages: book.soTrang || "Chưa cập nhật",
+      category: book.theLoai?.tenTheLoai || "Chưa phân loại",
+    };
+
+    navigate(`/books/${book.id}`, { state: { bookData } });
   };
 
   return (
@@ -249,8 +116,8 @@ function ShopPage() {
               <img
                 onClick={() => handleBookClick(book)}
                 key={book.id}
-                src={book.image}
-                alt={book.title}
+                src={book.hinhAnh || book.image}
+                alt={book.tenSach || book.title}
                 className={`w-1/3 h-[90%] object-cover rounded-sm shadow-lg transition-transform duration-300 hover:scale-105
         ${index === 0 ? "translate-y-8" : ""} 
         ${index === 1 ? "-translate-y-6" : ""} 
@@ -299,43 +166,50 @@ function ShopPage() {
 
             {/* Grid Layout - 6 columns */}
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-              {bookdata.map((book) => (
-                <div key={book.id} className="flex flex-col group">
-                  <div className="relative w-full aspect-[2/3] bg-gray-200 mb-4 overflow-hidden rounded-sm">
-                    <img
-                      onClick={() => handleBookClick(book)}
-                      src={book.hinhAnh}
-                      alt={book.tenSach}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                  </div>
+              {bookdata.map((book) => {
+                const authorText =
+                  book.tacGias
+                    ?.map((t) => t.hoTen || t.tenTacGia || t.name)
+                    .join(", ") || "Chưa cập nhật";
 
-                  <h3 className="font-serif text-lg font-semibold text-gray-900 leading-tight mb-1 truncate">
-                    {book.tenSach}
-                  </h3>
-                  <p className="text-xs text-gray-600 mb-1">{book.tacGia}</p>
+                return (
+                  <div key={book.id} className="flex flex-col group">
+                    <div className="relative w-full aspect-[2/3] bg-gray-200 mb-4 overflow-hidden rounded-sm">
+                      <img
+                        onClick={() => handleBookClick(book)}
+                        src={book.hinhAnh}
+                        alt={book.tenSach}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    </div>
 
-                  {/* <div className="flex items-center text-xs text-gray-700 font-medium mb-3">
+                    <h3 className="font-serif text-lg font-semibold text-gray-900 leading-tight mb-1 truncate">
+                      {book.tenSach}
+                    </h3>
+                    <p className="text-xs text-gray-600 mb-1">{authorText}</p>
+
+                    {/* <div className="flex items-center text-xs text-gray-700 font-medium mb-3">
                     <StarFilled className="text-[#c87a50] mr-1 text-[10px]" />
                     {book.rating}
                   </div> */}
 
-                  <div className="flex items-center justify-between mt-auto">
-                    <span className="text-sm font-semibold text-gray-900">
-                      {book.giaBan.toLocaleString("vi-VN", {
-                        style: "currency",
-                        currency: "VND",
-                      })}
-                    </span>
-                    <Button
-                      className="!bg-[#1b3627] hover:!bg-[#12241a] !text-white border-none text-xs px-4 rounded-sm h-7"
-                      onClick={() => addToCart(book)}
-                    >
-                      Add
-                    </Button>
+                    <div className="flex items-center justify-between mt-auto">
+                      <span className="text-sm font-semibold text-gray-900">
+                        {Number(book.giaBan || 0).toLocaleString("vi-VN", {
+                          style: "currency",
+                          currency: "VND",
+                        })}
+                      </span>
+                      <Button
+                        className="!bg-[#1b3627] hover:!bg-[#12241a] !text-white border-none text-xs px-4 rounded-sm h-7"
+                        onClick={() => addToCart(book)}
+                      >
+                        Add
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
           <div className="flex justify-center mt-8">
@@ -348,7 +222,6 @@ function ShopPage() {
           </div>
         </div>
       </div>
-      <CartDrawer />
     </>
   );
 }

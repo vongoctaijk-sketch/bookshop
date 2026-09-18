@@ -1,7 +1,9 @@
 package com.example.Bookshop.controller;
 
+import com.example.Bookshop.dto.HoaDonRequest;
 import com.example.Bookshop.entity.HoaDon;
 import com.example.Bookshop.service.HoaDonService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,17 +32,21 @@ public class HoaDonController {
 
     @GetMapping("/{id}")
     public ResponseEntity<HoaDon> getById(@PathVariable Integer id) {
-        return service.getById(id).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        return service.getById(id)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public ResponseEntity<HoaDon> create(@RequestBody HoaDon entity) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(entity));
+    public ResponseEntity<HoaDon> create(@Valid @RequestBody HoaDonRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(request));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<HoaDon> update(@PathVariable Integer id, @RequestBody HoaDon entity) {
-        return service.update(id, entity).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    public ResponseEntity<HoaDon> update(@PathVariable Integer id, @Valid @RequestBody HoaDon entity) {
+        return service.update(id, entity)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")

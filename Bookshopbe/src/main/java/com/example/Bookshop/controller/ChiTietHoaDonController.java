@@ -2,6 +2,7 @@ package com.example.Bookshop.controller;
 
 import com.example.Bookshop.entity.ChiTietHoaDon;
 import com.example.Bookshop.service.ChiTietHoaDonService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,17 +31,21 @@ public class ChiTietHoaDonController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ChiTietHoaDon> getById(@PathVariable Integer id) {
-        return service.getById(id).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        return service.getById(id)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public ResponseEntity<ChiTietHoaDon> create(@RequestBody ChiTietHoaDon entity) {
+    public ResponseEntity<ChiTietHoaDon> create(@Valid @RequestBody ChiTietHoaDon entity) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.create(entity));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ChiTietHoaDon> update(@PathVariable Integer id, @RequestBody ChiTietHoaDon entity) {
-        return service.update(id, entity).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    public ResponseEntity<ChiTietHoaDon> update(@PathVariable Integer id, @Valid @RequestBody ChiTietHoaDon entity) {
+        return service.update(id, entity)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")

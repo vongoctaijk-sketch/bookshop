@@ -29,13 +29,30 @@ export function CartProvider({ children }) {
 
   // Thêm sản phẩm
   const addToCart = (book) => {
-    setCartItems((prevItems) => {
-      const existingItem = prevItems.find((item) => item.id === book.id);
+    const normalizedBook = {
+      ...book,
+      id: book.id,
+      title: book.tenSach || book.title,
+      author:
+        book.tacGias?.map((t) => t.hoTen || t.tenTacGia || t.name).join(", ") ||
+        book.author ||
+        "Chưa cập nhật",
+      image: book.hinhAnh || book.image,
+      price: Number(book.giaBan ?? book.price ?? 0),
+      publisher: book.nhaXuatBan?.tenNxb || book.publisher || "Chưa cập nhật",
+      year: book.namXuatBan ?? book.year ?? "Chưa cập nhật",
+      pages: book.soTrang ?? book.pages ?? "Chưa cập nhật",
+      quantity: 1,
+    };
 
-      // Nếu sách đã có → tăng quantity
+    setCartItems((prevItems) => {
+      const existingItem = prevItems.find(
+        (item) => item.id === normalizedBook.id,
+      );
+
       if (existingItem) {
         return prevItems.map((item) =>
-          item.id === book.id
+          item.id === normalizedBook.id
             ? {
                 ...item,
                 quantity: item.quantity + 1,
@@ -44,14 +61,7 @@ export function CartProvider({ children }) {
         );
       }
 
-      // Nếu chưa có → thêm mới
-      return [
-        ...prevItems,
-        {
-          ...book,
-          quantity: 1,
-        },
-      ];
+      return [...prevItems, normalizedBook];
     });
   };
 
@@ -79,10 +89,16 @@ export function CartProvider({ children }) {
     setCartItems([]);
   };
 
+  const cartItemCount = cartItems.reduce(
+    (total, item) => total + (item.quantity || 1),
+    0,
+  );
+
   return (
     <CartContext.Provider
       value={{
         cartItems,
+        cartItemCount,
         isCartOpen,
         openCart,
         closeCart,

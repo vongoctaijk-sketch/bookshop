@@ -34,6 +34,9 @@ public class TacGia {
     @Column(name = "quoc_tich")
     private String quocTich;
 
+    @Column(name = "tieu_su", columnDefinition = "TEXT")
+    private String tieuSu;
+
     @ManyToMany(mappedBy = "tacGias")
     @JsonIgnoreProperties({"tacGias", "theLoai", "nhaXuatBan"})
     private List<Sach> danhSachSach;

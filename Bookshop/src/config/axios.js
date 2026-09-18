@@ -10,6 +10,29 @@ const api = axios.create({
   },
 });
 
+const unwrapApiResponse = (response) => {
+  const body = response?.data;
+
+  if (
+    body &&
+    typeof body === "object" &&
+    Object.prototype.hasOwnProperty.call(body, "success") &&
+    Object.prototype.hasOwnProperty.call(body, "data")
+  ) {
+    return {
+      ...response,
+      data: body.data,
+      meta: {
+        success: body.success,
+        code: body.code,
+        message: body.message,
+      },
+    };
+  }
+
+  return response;
+};
+
 // ==================== REQUEST INTERCEPTOR ====================
 api.interceptors.request.use(
   (config) => {
@@ -39,14 +62,16 @@ api.interceptors.request.use(
 // ==================== RESPONSE INTERCEPTOR ====================
 api.interceptors.response.use(
   (response) => {
+    const normalizedResponse = unwrapApiResponse(response);
+
     console.log(
-      `%c[API SUCCESS] ${response.status} ${response.config.url}`,
+      `%c[API SUCCESS] ${normalizedResponse.status} ${normalizedResponse.config.url}`,
       "color: #4caf50; font-weight: bold;",
     );
 
-    console.log("Response:", response.data);
+    console.log("Response:", normalizedResponse.data);
 
-    return response;
+    return normalizedResponse.data;
   },
 
   async (error) => {

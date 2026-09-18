@@ -16,5 +16,6 @@ public class TacGiaDto {
     private Integer id;
     private String hoTen;
     private String quocTich;
+    private String tieuSu;
     private List<Integer> sachIds;
 }

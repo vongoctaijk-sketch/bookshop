@@ -11,6 +11,9 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -33,27 +36,37 @@ public class HoaDon {
     @Column(name = "id")
     private Integer id;
 
+    @NotBlank(message = "Mã hóa đơn không được để trống")
     @Column(name = "ma_hoa_don")
     private String maHoaDon;
 
+    @NotNull(message = "Ngày bán không được để trống")
     @Column(name = "ngay_ban")
     private LocalDateTime ngayBan;
 
+    @NotNull(message = "Tổng tiền không được để trống")
+    @DecimalMin(value = "0.0", inclusive = false, message = "Tổng tiền phải lớn hơn 0")
     @Column(name = "tong_tien")
     private BigDecimal tongTien;
 
+    @NotBlank(message = "Trạng thái không được để trống")
     @Column(name = "trang_thai")
     private String trangThai;
 
-    @ManyToOne
-    @JoinColumn(name = "khach_hang_id")
-    @JsonIgnoreProperties({"hoaDons", "phieuDatGiuSachs"})
-    private KhachHang khachHang;
-
+    @NotNull(message = "Người dùng không được để trống")
     @ManyToOne
     @JoinColumn(name = "nguoi_dung_id")
     @JsonIgnoreProperties({"hoaDons", "phieuNhaps", "nhomNguoiDung"})
     private NguoiDung nguoiDung;
+
+    @Column(name = "ten_nguoi_nhan")
+    private String tenNguoiNhan;
+
+    @Column(name = "sdt_nguoi_nhan")
+    private String sdtNguoiNhan;
+
+    @Column(name = "dia_chi_giao_hang")
+    private String diaChiGiaoHang;
 
     @OneToMany(mappedBy = "hoaDon")
     @JsonIgnoreProperties({"hoaDon", "sach"})

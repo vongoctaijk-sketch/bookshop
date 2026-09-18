@@ -5,6 +5,8 @@ import com.example.Bookshop.dto.LoginRequest;
 import com.example.Bookshop.dto.LoginResponse;
 import com.example.Bookshop.dto.RefreshAccessTokenRequest;
 import com.example.Bookshop.dto.RegisterRequest;
+import com.example.Bookshop.entity.NguoiDung;
+import com.example.Bookshop.repository.NguoiDungRepository;
 import com.example.Bookshop.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final AuthService authService;
+    private final NguoiDungRepository nguoiDungRepository;
 
     @PostMapping("/register")
     public ResponseEntity<RegisterRequest> register(@Valid @RequestBody RegisterRequest request) {
@@ -49,7 +52,10 @@ public class AuthController {
 
     @GetMapping("/me")
     public ResponseEntity<CurrentUserResponse> me(@AuthenticationPrincipal UserDetails userDetails) {
+        NguoiDung nguoiDung = nguoiDungRepository.findByEmail(userDetails.getUsername()).orElse(null);
+
         return ResponseEntity.ok(new CurrentUserResponse(
+                nguoiDung != null ? nguoiDung.getId() : 1,
                 userDetails.getUsername(),
                 userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList()
         ));

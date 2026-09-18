@@ -1,10 +1,8 @@
 package com.example.Bookshop.service.impl;
 
 import com.example.Bookshop.dto.AdminCreateUserRequest;
-import com.example.Bookshop.entity.KhachHang;
 import com.example.Bookshop.entity.NguoiDung;
 import com.example.Bookshop.entity.NhomNguoiDung;
-import com.example.Bookshop.repository.KhachHangRepository;
 import com.example.Bookshop.repository.NguoiDungRepository;
 import com.example.Bookshop.repository.NhomNguoiDungRepository;
 import com.example.Bookshop.security.BookshopPasswordEncoder;
@@ -22,7 +20,7 @@ import java.util.Optional;
 public class NguoiDungServiceImpl extends AbstractCrudServiceImpl<NguoiDung, Integer> implements NguoiDungService {
 
     private final NguoiDungRepository repository;
-    private final KhachHangRepository khachHangRepository;
+
     private final NhomNguoiDungRepository nhomNguoiDungRepository;
     private final PasswordEncoder passwordEncoder;
 
@@ -83,14 +81,7 @@ public class NguoiDungServiceImpl extends AbstractCrudServiceImpl<NguoiDung, Int
             nguoiDung.setNhomNguoiDung(nhom);
         }
 
-        if ("KHACH_HANG".equalsIgnoreCase(tenNhom)) {
-            KhachHang khachHang = new KhachHang();
-            khachHang.setHoTen(request.getHoTen());
-            khachHang.setEmail(email);
-            khachHang.setSdt(request.getSdt());
-            khachHang = khachHangRepository.save(khachHang);
-            nguoiDung.setKhachHang(khachHang);
-        }
+
 
         return repository.save(nguoiDung);
     }

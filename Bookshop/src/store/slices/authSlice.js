@@ -1,7 +1,31 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { tokenStorage } from "../../utils/tokenStorage";
 
+const normalizeAuthorities = (authorities) => {
+  if (!Array.isArray(authorities)) return [];
+  return authorities;
+};
+
+const buildUser = (payload) => {
+  const authorities = normalizeAuthorities(payload?.authorities);
+  const id = payload?.id ?? payload?.user?.id ?? null;
+  const username = payload?.username || payload?.user?.username || null;
+  const isAdmin = authorities.some(
+    (authority) =>
+      authority.toUpperCase() === "ROLE_ADMIN" ||
+      authority.toUpperCase() === "ADMIN",
+  );
+
+  return {
+    id,
+    username,
+    authorities,
+    role: isAdmin ? "admin" : "user",
+  };
+};
+
 const initialState = {
+  user: null,
   username: null,
   accessToken: tokenStorage.getAccessToken(),
   refreshToken: tokenStorage.getRefreshToken(),
@@ -14,21 +38,22 @@ const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
-    // Login actions
     loginStart: (state) => {
       state.loading = true;
       state.error = null;
     },
     loginSuccess: (state, action) => {
-      const { username, accessToken, refreshToken } = action.payload;
-      state.username = username;
+      const { accessToken, refreshToken } = action.payload;
+      const user = buildUser(action.payload);
+
+      state.user = user;
+      state.username = user.username;
       state.accessToken = accessToken;
       state.refreshToken = refreshToken;
       state.isAuthenticated = true;
       state.loading = false;
       state.error = null;
 
-      // Lưu tokens: accessToken vào localStorage, refreshToken vào cookie
       tokenStorage.setTokens(accessToken, refreshToken);
     },
     loginFailure: (state, action) => {
@@ -37,8 +62,8 @@ const authSlice = createSlice({
       state.isAuthenticated = false;
     },
 
-    // Logout actions
     logout: (state) => {
+      state.user = null;
       state.username = null;
       state.accessToken = null;
       state.refreshToken = null;
@@ -46,34 +71,30 @@ const authSlice = createSlice({
       state.loading = false;
       state.error = null;
 
-      // Xóa tất cả tokens
       tokenStorage.clearTokens();
     },
 
-    // Register actions
     registerStart: (state) => {
       state.loading = true;
       state.error = null;
     },
     registerSuccess: (state, action) => {
-      // Chỉ lưu user info, KHÔNG auto login
-      // User phải đăng nhập bằng credentials
       state.username = action.payload?.username || null;
       state.loading = false;
       state.error = null;
-      // isAuthenticated vẫn = false (chưa login)
     },
     registerFailure: (state, action) => {
       state.loading = false;
       state.error = action.payload;
     },
 
-    // Get current user
     getCurrentUserStart: (state) => {
       state.loading = true;
     },
     getCurrentUserSuccess: (state, action) => {
-      state.username = action.payload?.username || null;
+      const user = buildUser(action.payload);
+      state.user = user;
+      state.username = user.username;
       state.loading = false;
       state.error = null;
     },
@@ -82,13 +103,14 @@ const authSlice = createSlice({
       state.error = action.payload;
     },
 
-    // Update profile
     updateProfileStart: (state) => {
       state.loading = true;
       state.error = null;
     },
     updateProfileSuccess: (state, action) => {
-      state.username = action.payload?.username || null;
+      const user = buildUser(action.payload);
+      state.user = user;
+      state.username = user.username;
       state.loading = false;
       state.error = null;
     },
@@ -97,7 +119,6 @@ const authSlice = createSlice({
       state.error = action.payload;
     },
 
-    // Refresh token
     refreshTokenSuccess: (state, action) => {
       const { accessToken, refreshToken } = action.payload;
       state.accessToken = accessToken;
@@ -107,6 +128,7 @@ const authSlice = createSlice({
       localStorage.setItem("refreshToken", refreshToken);
     },
     refreshTokenFailure: (state) => {
+      state.user = null;
       state.accessToken = null;
       state.refreshToken = null;
       state.isAuthenticated = false;
@@ -116,7 +138,6 @@ const authSlice = createSlice({
       localStorage.removeItem("refreshToken");
     },
 
-    // Clear error
     clearError: (state) => {
       state.error = null;
     },

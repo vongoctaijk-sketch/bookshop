@@ -3,11 +3,9 @@ package com.example.Bookshop.service.impl;
 import com.example.Bookshop.dto.LoginRequest;
 import com.example.Bookshop.dto.LoginResponse;
 import com.example.Bookshop.dto.RegisterRequest;
-import com.example.Bookshop.entity.KhachHang;
 import com.example.Bookshop.entity.NguoiDung;
 import com.example.Bookshop.entity.NhomNguoiDung;
 import com.example.Bookshop.entity.RefreshToken;
-import com.example.Bookshop.repository.KhachHangRepository;
 import com.example.Bookshop.repository.NguoiDungRepository;
 import com.example.Bookshop.repository.NhomNguoiDungRepository;
 import com.example.Bookshop.repository.RefreshTokenRepository;
@@ -39,7 +37,7 @@ public class AuthServiceImpl implements AuthService {
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
     private final NguoiDungRepository nguoiDungRepository;
-    private final KhachHangRepository khachHangRepository;
+
     private final NhomNguoiDungRepository nhomNguoiDungRepository;
     @Value("${app.jwt.refresh-token-expiration-ms}")
     private long refreshTokenExpirationMs;
@@ -83,11 +81,7 @@ public class AuthServiceImpl implements AuthService {
             throw new IllegalArgumentException("Username da ton tai");
         }
 
-        KhachHang khachHang = new KhachHang();
-        khachHang.setHoTen(hoTen);
-        khachHang.setEmail(email);
-        khachHang.setSdt(request.getSdt());
-        khachHang = khachHangRepository.save(khachHang);
+
 
         NguoiDung nguoiDung = new NguoiDung();
         nguoiDung.setUsername(username);
@@ -96,7 +90,7 @@ public class AuthServiceImpl implements AuthService {
         nguoiDung.setPassword(passwordEncoder.encode(request.getPassword()));
         nguoiDung.setSdt(request.getSdt());
         nguoiDung.setDiaChi(request.getDiaChi());
-        nguoiDung.setKhachHang(khachHang);
+
         nguoiDung.setNhomNguoiDung(Nhom);
         nguoiDungRepository.save(nguoiDung);
         return request;

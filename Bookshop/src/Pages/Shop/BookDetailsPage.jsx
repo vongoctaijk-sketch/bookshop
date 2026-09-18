@@ -13,14 +13,31 @@ import { useState } from "react";
 
 const BookDetailsPage = () => {
   const location = useLocation();
-  const { addToCart } = useCart();
+  const { addToCart, openCart } = useCart();
   const [quantity, setQuantity] = useState(1);
   const [isFavorite, setIsFavorite] = useState(false);
 
-  // Lấy dữ liệu bookData từ state
-  const book = location.state?.bookData;
+  const rawBook = location.state?.bookData;
 
-  // Xử lý lỗi khi F5 (mất state): Đẩy về trang chủ
+  const book = rawBook
+    ? {
+        ...rawBook,
+        title: rawBook.title || rawBook.tenSach,
+        image: rawBook.image || rawBook.hinhAnh,
+        price: Number(rawBook.price ?? rawBook.giaBan ?? 0),
+        author:
+          rawBook.author ||
+          rawBook.tacGias
+            ?.map((t) => t.hoTen || t.tenTacGia || t.name)
+            .join(", ") ||
+          "Chưa cập nhật",
+        publisher:
+          rawBook.publisher || rawBook.nhaXuatBan?.tenNxb || "Chưa cập nhật",
+        year: rawBook.year ?? rawBook.namXuatBan ?? "Chưa cập nhật",
+        pages: rawBook.pages ?? rawBook.soTrang ?? "Chưa cập nhật",
+      }
+    : null;
+
   if (!book) {
     return <Navigate to="/" replace />;
   }
@@ -29,35 +46,21 @@ const BookDetailsPage = () => {
     for (let i = 0; i < quantity; i++) {
       addToCart(book);
     }
+    openCart();
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
-      {/* Breadcrumb */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-6xl mx-auto px-6 py-4">
           <nav className="text-sm text-gray-600">
-            <span>
-              <a href="/" className="text-[#c18653] hover:underline">
-                Trang chủ
-              </a>
-            </span>
-            <span className="mx-2">/</span>
-            <span>
-              <a href="/shop" className="text-[#c18653] hover:underline">
-                Cửa hàng
-              </a>
-            </span>
-            <span className="mx-2">/</span>
             <span className="text-gray-800 font-medium">{book.title}</span>
           </nav>
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="max-w-6xl mx-auto px-6 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-          {/* Left Column - Image */}
           <div className="flex flex-col">
             <div className="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200 mb-6">
               <div className="aspect-[3/4] bg-gray-100 flex items-center justify-center">
@@ -69,7 +72,6 @@ const BookDetailsPage = () => {
               </div>
             </div>
 
-            {/* Thumbnail Section */}
             <div className="flex gap-3">
               <div className="w-16 h-20 bg-white rounded border-2 border-[#c18653] cursor-pointer overflow-hidden">
                 <img
@@ -88,9 +90,7 @@ const BookDetailsPage = () => {
             </div>
           </div>
 
-          {/* Right Column - Details */}
           <div className="flex flex-col">
-            {/* Rating */}
             <div className="flex items-center gap-2 mb-4">
               <div className="flex gap-1">
                 {[...Array(5)].map((_, i) => (
@@ -105,31 +105,24 @@ const BookDetailsPage = () => {
               <span className="text-gray-600 text-sm">(124 bình luận)</span>
             </div>
 
-            {/* Title */}
             <h1 className="text-4xl font-bold text-gray-900 mb-4 leading-tight">
               {book.title}
             </h1>
 
-            {/* Price Section */}
             <div className="bg-gradient-to-r from-[#d4995f] to-[#c18653] rounded-lg p-6 mb-6 text-white">
               <p className="text-sm font-semibold uppercase tracking-wide mb-2">
                 Giá bán
               </p>
               <div className="flex items-baseline gap-4">
                 <p className="text-4xl font-bold">
-                  ₫{book.price?.toLocaleString("vi-VN") || 0}
+                  ₫{book.price.toLocaleString("vi-VN")}
                 </p>
                 <p className="text-lg line-through opacity-80">
-                  ₫
-                  {(book.price
-                    ? Math.round(book.price * 1.2)
-                    : 0
-                  ).toLocaleString("vi-VN")}
+                  ₫{Math.round(book.price * 1.2).toLocaleString("vi-VN")}
                 </p>
               </div>
             </div>
 
-            {/* Book Info */}
             <div className="bg-gray-50 rounded-lg p-6 mb-6 space-y-3 text-sm">
               <div className="flex justify-between border-b border-gray-200 pb-3">
                 <span className="text-gray-600 font-medium">Tác giả:</span>
@@ -157,7 +150,6 @@ const BookDetailsPage = () => {
               </div>
             </div>
 
-            {/* Quantity and Buttons */}
             <div className="space-y-4 mb-8">
               <div className="flex items-center gap-4">
                 <span className="text-gray-700 font-medium">Số lượng:</span>
@@ -185,7 +177,6 @@ const BookDetailsPage = () => {
                 </div>
               </div>
 
-              {/* Action Buttons */}
               <button
                 onClick={handleAddToCart}
                 className="w-full bg-[#c18653] hover:bg-[#a67144] text-white font-bold py-4 px-6 rounded-lg flex items-center justify-center gap-2 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
@@ -195,7 +186,6 @@ const BookDetailsPage = () => {
               </button>
             </div>
 
-            {/* Secondary Actions */}
             <div className="flex gap-3 mb-8">
               <button
                 onClick={() => setIsFavorite(!isFavorite)}
@@ -216,7 +206,6 @@ const BookDetailsPage = () => {
               </button>
             </div>
 
-            {/* Benefits */}
             <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
               <div className="flex gap-4">
                 <Truck className="w-6 h-6 text-[#c18653] flex-shrink-0" />

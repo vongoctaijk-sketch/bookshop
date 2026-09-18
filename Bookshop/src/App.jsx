@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import Login from "./Pages/Login/LoginPage";
 import Register from "./Pages/Login/RegisterPage";
@@ -8,16 +7,21 @@ import AdminLayout from "./Component/Layout/AdminLayout/AdminLayout";
 import ShopLayout from "./Component/Layout/ShopLayout/ShopLayout";
 import BookDetailsPage from "./Pages/Shop/BookDetailsPage";
 import ShopPage from "./Pages/Shop/ShopPage";
+import CheckoutPage from "./Pages/Shop/CheckoutPage";
 import ProtectedRoute from "./components/ProtectedRoute";
+import { useGetCurrentUser } from "./hooks/useAuth";
 import "./App.css";
 
 function App() {
+  useGetCurrentUser();
+
   return (
     <Routes>
       {/* Public Routes */}
       <Route path="/" element={<ShopLayout />}>
         <Route index element={<ShopPage />} />
         <Route path="books/:id" element={<BookDetailsPage />} />
+        <Route path="checkout" element={<CheckoutPage />} />
       </Route>
 
       {/* Auth Routes */}

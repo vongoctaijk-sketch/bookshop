@@ -1,8 +1,12 @@
 import { Drawer } from "antd";
 import { Trash2, Minus, Plus, ShoppingCart } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { useCart } from "./CartContext";
+import { useAuthState } from "../../hooks/useAuth";
 
 function CartDrawer() {
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuthState();
   const { cartItems, isCartOpen, closeCart, removeFromCart, updateQuantity } =
     useCart();
 
@@ -57,11 +61,11 @@ function CartDrawer() {
                   className="flex gap-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
                 >
                   {/* Item Image */}
-                  {item.image && (
+                  {(item.image || item.hinhAnh) && (
                     <div className="w-20 h-24 flex-shrink-0 bg-white rounded overflow-hidden border border-gray-200">
                       <img
-                        src={item.image}
-                        alt={item.title}
+                        src={item.image || item.hinhAnh}
+                        alt={item.title || item.tenSach}
                         className="w-full h-full object-cover"
                       />
                     </div>
@@ -70,7 +74,7 @@ function CartDrawer() {
                   {/* Item Details */}
                   <div className="flex-1 min-w-0">
                     <h4 className="font-semibold text-gray-800 text-sm line-clamp-2 mb-2">
-                      {item.title}
+                      {item.title || item.tenSach}
                     </h4>
 
                     {/* Price */}
@@ -138,7 +142,18 @@ function CartDrawer() {
             {/* Buttons */}
             <div className="space-y-3">
               <button
-                onClick={closeCart}
+                onClick={() => {
+                  if (!isAuthenticated) {
+                    closeCart();
+                    navigate("/login", {
+                      state: { from: { pathname: "/checkout" } },
+                    });
+                    return;
+                  }
+
+                  closeCart();
+                  navigate("/checkout");
+                }}
                 className="w-full px-4 py-3 bg-[#c18653] text-white font-semibold rounded-lg hover:bg-[#a67144] transition-colors duration-200 shadow-md hover:shadow-lg"
               >
                 Thanh Toán

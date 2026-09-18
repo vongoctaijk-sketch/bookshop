@@ -1,13 +1,17 @@
 import React from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import { Layout } from "antd";
 const { Header, Content, Footer } = Layout;
-import { BookOpen, Search, ShoppingCart } from "lucide-react";
+import { BookOpen, Search, ShoppingCart, LogOut } from "lucide-react";
 import { useCart } from "../../../Pages/Shop/CartContext";
-import { useNavigate } from "react-router-dom";
+import CartDrawer from "../../../Pages/Shop/CartDrawer";
+import ShopChatBox from "../../../components/ShopChatBox";
+import { useAuthState, useLogout } from "../../../hooks/useAuth";
 function ShopLayout() {
   const navigate = useNavigate();
-  const { openCart, cartItems } = useCart();
+  const { openCart, cartItemCount } = useCart();
+  const { isAuthenticated } = useAuthState();
+  const logoutMutation = useLogout();
   const [keyword, setKeyword] = React.useState("");
   const handleSearch = () => {
     navigate(`/?keyword=${encodeURIComponent(keyword)}`);
@@ -15,12 +19,16 @@ function ShopLayout() {
   return (
     <Layout className="!min-h-screen ">
       <Header className="!bg-[#18352a] !h-20 flex items-center justify-between !px-6 !py-12 sticky top-0 z-50">
-        <div className="flex items-center gap-3 ">
+        <button
+          type="button"
+          className="flex items-center gap-3"
+          onClick={() => navigate("/")}
+        >
           <BookOpen className="text-[#d4995f] w-7 h-7" strokeWidth={1.5} />
           <span className="font-serif text-white text-2xl font-semibold tracking-wide">
             Folio & Spine
           </span>
-        </div>
+        </button>
         <div className="hidden md:flex flex-1 h-12 max-w-2xl mx-8 relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <Search className="h-5 w-5 text-gray-400" />
@@ -38,14 +46,34 @@ function ShopLayout() {
             }}
           />
         </div>
-        <div className="shrink-0">
+        <div className="shrink-0 flex items-center gap-3">
+          {isAuthenticated && (
+            <button
+              className="flex items-center gap-2 bg-transparent hover:bg-[#254433] text-white px-4 py-2.5 rounded-md transition-colors duration-200 border border-[#d4995f] cursor-pointer"
+              onClick={() => {
+                logoutMutation.mutate(undefined, {
+                  onSuccess: () => navigate("/login"),
+                });
+              }}
+            >
+              <LogOut className="w-4 h-4" />
+              <span className="font-medium text-base">Logout</span>
+            </button>
+          )}
           <button
-            className="flex items-center gap-2 bg-[#c18653] hover:bg-[#a67144] text-white px-6 py-2.5 rounded-md transition-colors duration-200 border-none cursor-pointer"
+            className="relative flex items-center gap-2 bg-[#c18653] hover:bg-[#a67144] text-white px-6 py-2.5 rounded-md transition-colors duration-200 border-none cursor-pointer"
             onClick={() => {
               openCart();
             }}
           >
-            <ShoppingCart className="w-5 h-5" />
+            <span className="relative">
+              <ShoppingCart className="w-5 h-5" />
+              {cartItemCount > 0 && (
+                <span className="absolute -top-2 -right-3 min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-[#f7f3ee] text-[#18352a] text-[10px] font-bold shadow-sm">
+                  {cartItemCount}
+                </span>
+              )}
+            </span>
             <span className="font-medium text-base">Cart</span>
           </button>
         </div>
@@ -53,6 +81,10 @@ function ShopLayout() {
       <Content className="flex-1 ">
         <Outlet />
       </Content>
+
+      <CartDrawer />
+      <ShopChatBox />
+
       <Footer className="!bg-[#18352a] !text-white !p-0">
         <div className="bg-[#18352a] text-white pt-12 pb-8 px-6">
           <div className="max-w-6xl mx-auto">

@@ -18,4 +18,7 @@ public interface SachService extends CrudService<Sach, Integer> {
     Sach create(Sach sach, MultipartFile fileAnh);
     List<Sach> topsachBanChayNhat();
     Optional<Sach> update(Integer id, Sach sach, MultipartFile fileAnh);
+
+    // Tool-facing search used by BookTools/AI layer
+    List<Sach> searchBooks(String keyword);
 }

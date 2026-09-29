@@ -1,14 +1,15 @@
 package com.example.Bookshop.service.impl;
 
+import com.example.Bookshop.entity.NhaXuatBan;
 import com.example.Bookshop.entity.Sach;
 import com.example.Bookshop.entity.TacGia;
 import com.example.Bookshop.entity.TheLoai;
-import com.example.Bookshop.entity.NhaXuatBan;
 import com.example.Bookshop.repository.NhaXuatBanRepository;
 import com.example.Bookshop.repository.SachRepository;
 import com.example.Bookshop.repository.TacGiaRepository;
 import com.example.Bookshop.repository.TheLoaiRepository;
 import com.example.Bookshop.service.CloudinaryService;
+import com.example.Bookshop.service.BookEmbeddingService;
 import com.example.Bookshop.service.SachService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -21,7 +22,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -33,6 +33,7 @@ public class SachServiceImpl extends AbstractCrudServiceImpl<Sach, Integer> impl
     private final NhaXuatBanRepository nhaXuatBanRepository;
     private final TacGiaRepository tacGiaRepository;
     private final CloudinaryService cloudinaryService;
+    private final BookEmbeddingService bookEmbeddingService;
 
     @Override
     protected JpaRepository<Sach, Integer> getRepository() {
@@ -62,7 +63,9 @@ public class SachServiceImpl extends AbstractCrudServiceImpl<Sach, Integer> impl
             sach.setHinhAnh(cloudinaryService.uploadFile(fileAnh));
         }
 
-        return sachRepository.save(sach);
+        Sach savedBook = sachRepository.save(sach);
+        bookEmbeddingService.index(savedBook);
+        return savedBook;
     }
 
     @Override
@@ -81,17 +84,19 @@ public class SachServiceImpl extends AbstractCrudServiceImpl<Sach, Integer> impl
                     }
 
                     setId(sach, id);
-                    return sachRepository.save(sach);
+                    Sach savedBook = sachRepository.save(sach);
+                    bookEmbeddingService.index(savedBook);
+                    return savedBook;
                 });
     }
-  @Override
-  public List<Sach> topsachBanChayNhat() {
 
-      Pageable pageable = PageRequest.of(0, 3);
+    @Override
+    public List<Sach> topsachBanChayNhat() {
+        Pageable pageable = PageRequest.of(0, 3);
+        return sachRepository.topSachBanChayNhat(pageable);
+    }
 
-      return sachRepository.topSachBanChayNhat(pageable);
-  }
-
+    @Override
     public Optional<Sach> update(Integer id, Sach sach, MultipartFile fileAnh) {
         if (sach == null) {
             throw new IllegalArgumentException("Dữ liệu sách không được null");
@@ -109,11 +114,13 @@ public class SachServiceImpl extends AbstractCrudServiceImpl<Sach, Integer> impl
                     }
 
                     setId(sach, id);
-                    return sachRepository.save(sach);
+                    Sach savedBook = sachRepository.save(sach);
+                    bookEmbeddingService.index(savedBook);
+                    return savedBook;
                 });
     }
 
-    public Sach resolveSachReferences(Sach sach) {
+        public Sach resolveSachReferences(Sach sach) {
         if (sach == null) {
             return null;
         }
@@ -212,4 +219,13 @@ public class SachServiceImpl extends AbstractCrudServiceImpl<Sach, Integer> impl
 
         return sachRepository.findAll(specification, pageable);
     }
+
+    @Override
+    public List<Sach> searchBooks(String keyword) {
+        if (keyword == null || keyword.isBlank()) {
+            return List.of();
+        }
+        return sachRepository.findTop10ByTenSachContainingIgnoreCase(keyword.trim());
+    }
 }
+

@@ -17,4 +17,7 @@ public interface SachRepository extends JpaRepository<Sach, Integer>, JpaSpecifi
 """)
     List<Sach> topSachBanChayNhat(Pageable pageable);
 
+   // Tìm tối đa 10 sách theo tên (không phân biệt hoa thường)
+    List<Sach> findTop10ByTenSachContainingIgnoreCase(String keyword);
+
 }

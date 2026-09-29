@@ -7,6 +7,8 @@ import {
 } from "@ant-design/icons";
 import AiService from "../services/AiService";
 
+const CONVERSATION_STORAGE_KEY = "bookshop_chat_conversation_id";
+
 const initialMessages = [
   {
     id: "welcome",
@@ -20,12 +22,86 @@ function ShopChatBox() {
   const [open, setOpen] = React.useState(false);
   const [input, setInput] = React.useState("");
   const [messages, setMessages] = React.useState(initialMessages);
+  const [conversationId, setConversationId] = React.useState(() =>
+    localStorage.getItem(CONVERSATION_STORAGE_KEY),
+  );
   const [isSending, setIsSending] = React.useState(false);
+  const [isLoadingConversation, setIsLoadingConversation] =
+    React.useState(false);
+
+  React.useEffect(() => {
+    if (!conversationId) {
+      return;
+    }
+
+    setIsLoadingConversation(true);
+
+    AiService.getMessages(conversationId)
+      .then((history) => {
+        if (Array.isArray(history) && history.length > 0) {
+          setMessages(
+            history.map((message) => ({
+              id: message.id,
+              role: message.role.toLowerCase(),
+              content: message.content,
+            })),
+          );
+        }
+      })
+      .catch(() => {
+        localStorage.removeItem(CONVERSATION_STORAGE_KEY);
+        setConversationId(null);
+        setMessages((currentMessages) => [
+          ...currentMessages,
+          {
+            id: `error-${Date.now()}`,
+            role: "assistant",
+            content:
+              "Sorry, the assistant is temporarily unavailable. Please try again.",
+          },
+        ]);
+      })
+      .finally(() => setIsLoadingConversation(false));
+  }, [conversationId]);
+
+  const openChat = async () => {
+    setOpen(true);
+
+    if (conversationId || isLoadingConversation) {
+      return;
+    }
+
+    setIsLoadingConversation(true);
+
+    try {
+      const conversation = await AiService.createConversation();
+      const id = conversation?.conversationId;
+
+      if (!id) {
+        throw new Error("Conversation ID was not returned");
+      }
+
+      localStorage.setItem(CONVERSATION_STORAGE_KEY, String(id));
+      setConversationId(String(id));
+    } catch {
+      setMessages((currentMessages) => [
+        ...currentMessages,
+        {
+          id: `error-${Date.now()}`,
+          role: "assistant",
+          content:
+            "Sorry, the assistant is temporarily unavailable. Please try again.",
+        },
+      ]);
+    } finally {
+      setIsLoadingConversation(false);
+    }
+  };
 
   const handleSend = async () => {
     const prompt = input.trim();
 
-    if (!prompt || isSending) {
+    if (!prompt || isSending || !conversationId) {
       return;
     }
 
@@ -37,7 +113,7 @@ function ShopChatBox() {
     setIsSending(true);
 
     try {
-      const response = await AiService.chatWithAi(prompt);
+      const response = await AiService.sendMessage(conversationId, prompt);
       const answer = response?.answer || response?.data?.answer;
 
       setMessages((currentMessages) => [
@@ -69,7 +145,7 @@ function ShopChatBox() {
         icon={<CustomerServiceOutlined />}
         type="primary"
         tooltip="Ask Folio AI"
-        onClick={() => setOpen(true)}
+        onClick={openChat}
         style={{ right: 24, bottom: 24 }}
       />
       <Drawer
@@ -148,14 +224,19 @@ function ShopChatBox() {
             }}
             placeholder="Ask about books..."
             autoSize={{ minRows: 2, maxRows: 5 }}
-            disabled={isSending}
+            disabled={isSending || isLoadingConversation || !conversationId}
           />
           <Button
             type="primary"
             icon={isSending ? <Spin size="small" /> : <SendOutlined />}
             onClick={handleSend}
             loading={isSending}
-            disabled={!input.trim()}
+            disabled={
+              !input.trim() ||
+              isSending ||
+              isLoadingConversation ||
+              !conversationId
+            }
             block
             style={{ marginTop: 8, background: "#18352a" }}
           >

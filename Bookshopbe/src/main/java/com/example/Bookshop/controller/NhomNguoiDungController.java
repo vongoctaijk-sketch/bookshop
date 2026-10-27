@@ -1,6 +1,7 @@
 package com.example.Bookshop.controller;
 
 import com.example.Bookshop.entity.NhomNguoiDung;
+import com.example.Bookshop.exception.ResourceNotFoundException;
 import com.example.Bookshop.service.NhomNguoiDungService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -30,7 +31,7 @@ public class NhomNguoiDungController {
 
     @GetMapping("/{id}")
     public ResponseEntity<NhomNguoiDung> getById(@PathVariable String id) {
-        return service.getById(id).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        return service.getById(id).map(ResponseEntity::ok).orElseThrow(ResourceNotFoundException::new);
     }
 
     @PostMapping
@@ -40,11 +41,14 @@ public class NhomNguoiDungController {
 
     @PutMapping("/{id}")
     public ResponseEntity<NhomNguoiDung> update(@PathVariable String id, @RequestBody NhomNguoiDung entity) {
-        return service.update(id, entity).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        return service.update(id, entity).map(ResponseEntity::ok).orElseThrow(ResourceNotFoundException::new);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable String id) {
-        return service.delete(id) ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+        if (!service.delete(id)) {
+            throw new ResourceNotFoundException();
+        }
+        return ResponseEntity.noContent().build();
     }
 }

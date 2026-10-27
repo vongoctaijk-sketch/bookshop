@@ -1,6 +1,7 @@
 package com.example.Bookshop.configs;
 
 import com.example.Bookshop.security.JwtAuthenticationFilter;
+import com.example.Bookshop.security.ApiSecurityExceptionHandler;
 import com.example.Bookshop.security.Permission;
 import com.example.Bookshop.security.BookshopPasswordEncoder;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,7 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final UserDetailsService userDetailsService;
+    private final ApiSecurityExceptionHandler apiSecurityExceptionHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -35,6 +37,9 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .exceptionHandling(exceptions -> exceptions
+                        .authenticationEntryPoint(apiSecurityExceptionHandler)
+                        .accessDeniedHandler(apiSecurityExceptionHandler))
                 .authorizeHttpRequests(auth -> auth
 
                         .requestMatchers("/api/nguoi-dung/**").permitAll()
@@ -76,6 +81,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/khach-hang/**").hasAuthority(Permission.KHACH_HANG_CREATE)
                         .requestMatchers(HttpMethod.PUT, "/api/khach-hang/**").hasAuthority(Permission.KHACH_HANG_UPDATE)
                         .requestMatchers(HttpMethod.DELETE, "/api/khach-hang/**").hasAuthority(Permission.KHACH_HANG_DELETE)
+                        .requestMatchers("/api/khuyen-mai/**").hasAuthority(Permission.HOA_DON_READ)
+                        .requestMatchers("/api/admin/reports/**").hasAuthority(Permission.HOA_DON_READ)
                         .requestMatchers(HttpMethod.GET, "/api/nguoi-dung/**").hasAuthority(Permission.NGUOI_DUNG_READ)
 
                         .requestMatchers(HttpMethod.PUT, "/api/nguoi-dung/**").hasAuthority(Permission.NGUOI_DUNG_UPDATE)

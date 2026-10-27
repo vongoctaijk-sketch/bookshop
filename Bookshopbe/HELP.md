@@ -20,10 +20,27 @@ The following guides illustrate how to use some features concretely:
 * [Accessing Data with JPA](https://spring.io/guides/gs/accessing-data-jpa/)
 * [Validation](https://spring.io/guides/gs/validating-form-input/)
 
+### API response conventions
+
+JSON responses from `/api/**` use a shared envelope:
+
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Success",
+  "data": {}
+}
+```
+
+Errors use the same fields with `success: false` and `data: null`. MVC errors are
+normalized by `GlobalExceptionHandler`; authentication and authorization errors
+use the same envelope in the security filter chain. DTO mapping is handled with
+MapStruct; for example, `CatalogSachMapper` maps book entities to catalog DTOs.
+
 ### Maven Parent overrides
 
 Due to Maven's design, elements are inherited from the parent POM to the project POM.
 While most of the inheritance is fine, it also inherits unwanted elements like `<license>` and `<developers>` from the parent.
 To prevent this, the project POM contains empty overrides for these elements.
 If you manually switch to a different parent and actually want the inheritance, you need to remove those overrides.
-

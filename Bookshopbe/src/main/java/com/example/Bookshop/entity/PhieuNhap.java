@@ -39,6 +39,9 @@ public class PhieuNhap {
     @Column(name = "tong_tien")
     private BigDecimal tongTien;
 
+    @Column(name = "trang_thai", nullable = false, columnDefinition = "VARCHAR(20) DEFAULT 'HOAN_THANH'")
+    private String trangThai = "HOAN_THANH";
+
     @ManyToOne
     @JoinColumn(name = "nha_cung_cap_id")
     @JsonIgnoreProperties({"phieuNhaps"})

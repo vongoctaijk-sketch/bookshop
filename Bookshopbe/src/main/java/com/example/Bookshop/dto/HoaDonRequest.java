@@ -30,6 +30,8 @@ public class HoaDonRequest {
     @NotBlank(message = "Địa chỉ giao hàng không được để trống")
     private String diaChiGiaoHang;
 
+    private String maKhuyenMai;
+
     @NotEmpty(message = "Hóa đơn phải có ít nhất một sách")
     @Valid
     private List<ChiTietHoaDonRequest> danhSachChiTiet;

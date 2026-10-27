@@ -56,6 +56,7 @@ function CheckoutPage() {
       tenNguoiNhan: values?.fullName,
       sdtNguoiNhan: values?.phone,
       diaChiGiaoHang: values?.address,
+      maKhuyenMai: values?.promoCode?.trim() || undefined,
       danhSachChiTiet: cartItems.map((item) => ({
         sachId: item.id,
         soLuong: item.quantity,
@@ -182,6 +183,9 @@ function CheckoutPage() {
                     placeholder="Ví dụ: 123 Lê Lợi, Quận 1, TP.HCM"
                   />
                 </Form.Item>
+                <Form.Item label="Mã khuyến mãi (không bắt buộc)" name="promoCode">
+                  <Input size="large" placeholder="Nhập mã khuyến mãi" />
+                </Form.Item>
               </Form>
             </Card>
 
@@ -269,7 +273,7 @@ function CheckoutPage() {
                 </div>
                 <div className="flex justify-between text-gray-600">
                   <span>Giảm giá</span>
-                  <span>0₫</span>
+                  <span>Áp dụng theo mã tại bước xác nhận</span>
                 </div>
               </div>
 

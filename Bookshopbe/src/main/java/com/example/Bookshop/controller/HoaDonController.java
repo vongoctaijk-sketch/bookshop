@@ -2,6 +2,7 @@ package com.example.Bookshop.controller;
 
 import com.example.Bookshop.dto.HoaDonRequest;
 import com.example.Bookshop.entity.HoaDon;
+import com.example.Bookshop.exception.ResourceNotFoundException;
 import com.example.Bookshop.service.HoaDonService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +35,7 @@ public class HoaDonController {
     public ResponseEntity<HoaDon> getById(@PathVariable Integer id) {
         return service.getById(id)
                 .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .orElseThrow(ResourceNotFoundException::new);
     }
 
     @PostMapping
@@ -46,11 +47,14 @@ public class HoaDonController {
     public ResponseEntity<HoaDon> update(@PathVariable Integer id, @Valid @RequestBody HoaDon entity) {
         return service.update(id, entity)
                 .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .orElseThrow(ResourceNotFoundException::new);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Integer id) {
-        return service.delete(id) ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+        if (!service.delete(id)) {
+            throw new ResourceNotFoundException();
+        }
+        return ResponseEntity.noContent().build();
     }
 }

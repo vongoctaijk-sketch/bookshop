@@ -1,6 +1,7 @@
 package com.example.Bookshop.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -38,6 +39,7 @@ public class NguoiDung {
     private String username;
 
     @Column(name = "password")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
     @Column(name = "email")
     private String email;
@@ -45,6 +47,15 @@ public class NguoiDung {
     private String sdt;
     @Column(name = "dia_chi")
     private String diaChi;
+
+    @Column(name = "diem_tich_luy", nullable = false, columnDefinition = "BIGINT DEFAULT 0")
+    private Long diemTichLuy = 0L;
+
+    @Column(name = "hang_thanh_vien", nullable = false, columnDefinition = "VARCHAR(16) DEFAULT 'DONG'")
+    private String hangThanhVien = "DONG";
+
+    @Column(name = "vip", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+    private Boolean vip = false;
 
 
 

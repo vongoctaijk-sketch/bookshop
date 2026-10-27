@@ -68,6 +68,12 @@ public class HoaDon {
     @Column(name = "dia_chi_giao_hang")
     private String diaChiGiaoHang;
 
+    @Column(name = "ma_khuyen_mai")
+    private String maKhuyenMai;
+
+    @Column(name = "tien_giam", nullable = false, columnDefinition = "NUMERIC(19,2) DEFAULT 0")
+    private BigDecimal tienGiam = BigDecimal.ZERO;
+
     @OneToMany(mappedBy = "hoaDon")
     @JsonIgnoreProperties({"hoaDon", "sach"})
     private List<ChiTietHoaDon> chiTietHoaDons;

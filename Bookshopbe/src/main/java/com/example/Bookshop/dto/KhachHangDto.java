@@ -19,4 +19,9 @@ public class KhachHangDto {
     private String email;
     private List<Integer> hoaDonIds;
     private List<Integer> phieuDatGiuSachIds;
+    private Long diemTichLuy;
+    private String hangThanhVien;
+    private Boolean vip;
+    private Long tongChiTieu;
+    private Integer soDonHoanThanh;
 }

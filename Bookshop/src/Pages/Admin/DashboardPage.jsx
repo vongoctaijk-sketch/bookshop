@@ -20,7 +20,6 @@ import {
 } from "antd";
 import {
   BookOpen,
-  LayoutDashboard,
   Tags,
   ShoppingCart,
   Users,
@@ -59,6 +58,9 @@ function DashboardPage() {
   const [authorForm] = Form.useForm();
   const [supplierForm] = Form.useForm();
   const [bookImageFile, setBookImageFile] = useState(null);
+  const [bookKeyword, setBookKeyword] = useState("");
+  const [bookCategoryFilter, setBookCategoryFilter] = useState();
+  const [stockFilter, setStockFilter] = useState("all");
 
   const queryClient = useQueryClient();
 
@@ -128,6 +130,17 @@ function DashboardPage() {
   const publishers = normalizeListResponse(publishersQuery.data);
   const authors = normalizeListResponse(authorsQuery.data);
   const suppliers = normalizeListResponse(suppliersQuery.data);
+  const filteredBooks = books.filter((book) => {
+    const keywordMatches = !bookKeyword || [book.tenSach, book.moTa, ...(book.tacGias || []).map((author) => author.hoTen)]
+      .filter(Boolean).some((value) => String(value).toLowerCase().includes(bookKeyword.toLowerCase()));
+    const categoryMatches = !bookCategoryFilter || book.theLoai?.id === bookCategoryFilter;
+    const stock = Number(book.soLuongTon || 0);
+    const inventoryMatches = stockFilter === "all"
+      || (stockFilter === "low" && stock <= 5)
+      || (stockFilter === "out" && stock === 0)
+      || (stockFilter === "high" && stock >= 50);
+    return keywordMatches && categoryMatches && inventoryMatches;
+  });
 
   const loading = dashboardQueries.some((query) => query.isLoading);
 
@@ -164,10 +177,9 @@ function DashboardPage() {
   }, [failedEndpoints, dashboardQueries.length]);
 
   const stats = useMemo(() => {
-    const totalRevenue = orders.reduce(
-      (sum, order) => sum + Number(order.tongTien || 0),
-      0,
-    );
+    const completedOrders = orders.filter((order) => order.trangThai === "COMPLETED");
+    const totalRevenue = completedOrders.reduce((sum, order) => sum + Number(order.tongTien || 0), 0);
+    const today = new Date().toDateString();
 
     return {
       totalBooks: books.length,
@@ -178,6 +190,10 @@ function DashboardPage() {
       totalAuthors: authors.length,
       totalSuppliers: suppliers.length,
       totalRevenue,
+      todayRevenue: completedOrders
+        .filter((order) => new Date(order.ngayBan).toDateString() === today)
+        .reduce((sum, order) => sum + Number(order.tongTien || 0), 0),
+      totalStock: books.reduce((sum, book) => sum + Number(book.soLuongTon || 0), 0),
       lowStock: books.filter((book) => Number(book.soLuongTon || 0) <= 5)
         .length,
     };
@@ -697,7 +713,7 @@ function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-7 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
         <Card className="!rounded-2xl !border-0 !shadow-sm">
           <Statistic
             title="Tổng sách"
@@ -747,6 +763,28 @@ function DashboardPage() {
             prefix={<Users className="w-4 h-4 mr-2 text-[#254433]" />}
           />
         </Card>
+        <Card className="!rounded-2xl !border-0 !shadow-sm">
+          <Statistic
+            title="Tồn kho (quyển)"
+            value={stats.totalStock}
+            prefix={<Package className="w-4 h-4 mr-2 text-[#18352a]" />}
+          />
+        </Card>
+        <Card className="!rounded-2xl !border-0 !shadow-sm">
+          <Statistic
+            title="Tổng doanh thu"
+            value={stats.totalRevenue}
+            formatter={(value) => Number(value).toLocaleString("vi-VN", { style: "currency", currency: "VND" })}
+            prefix={<ShoppingCart className="w-4 h-4 mr-2 text-[#c18653]" />}
+          />
+        </Card>
+        <Card className="!rounded-2xl !border-0 !shadow-sm">
+          <Statistic
+            title="Doanh thu hôm nay"
+            value={stats.todayRevenue}
+            formatter={(value) => Number(value).toLocaleString("vi-VN", { style: "currency", currency: "VND" })}
+          />
+        </Card>
       </div>
 
       <Card className="!rounded-2xl !border-0 !shadow-sm">
@@ -768,10 +806,20 @@ function DashboardPage() {
 
         <Tabs defaultActiveKey="books">
           <TabPane tab="Quản lý sách" key="books">
+            <div className="mb-4 grid grid-cols-1 gap-3 md:grid-cols-3">
+              <Input.Search allowClear placeholder="Tìm theo tên sách, mô tả, tác giả" value={bookKeyword} onChange={(event) => setBookKeyword(event.target.value)} />
+              <Select allowClear placeholder="Lọc thể loại" value={bookCategoryFilter} onChange={setBookCategoryFilter} options={categories.map((category) => ({ value: category.id, label: category.tenTheLoai }))} />
+              <Select value={stockFilter} onChange={setStockFilter} options={[
+                { value: "all", label: "Mọi mức tồn kho" },
+                { value: "low", label: "Sắp hết (≤ 5)" },
+                { value: "out", label: "Hết hàng" },
+                { value: "high", label: "Tồn cao (≥ 50)" },
+              ]} />
+            </div>
             <Spin spinning={loading}>
               <Table
                 columns={bookColumns}
-                dataSource={books}
+                dataSource={filteredBooks}
                 rowKey="id"
                 pagination={{ pageSize: 6 }}
               />

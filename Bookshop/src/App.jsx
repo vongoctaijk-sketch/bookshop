@@ -3,6 +3,10 @@ import Login from "./Pages/Login/LoginPage";
 import Register from "./Pages/Login/RegisterPage";
 import Dashboard from "./Pages/Admin/DashboardPage";
 import Order from "./Pages/Admin/OrderPage";
+import Purchase from "./Pages/Admin/PurchasePage";
+import Customers from "./Pages/Admin/CustomerPage";
+import Reports from "./Pages/Admin/ReportPage";
+import Promotions from "./Pages/Admin/PromotionPage";
 import AdminLayout from "./Component/Layout/AdminLayout/AdminLayout";
 import ShopLayout from "./Component/Layout/ShopLayout/ShopLayout";
 import BookDetailsPage from "./Pages/Shop/BookDetailsPage";
@@ -40,6 +44,10 @@ function App() {
       >
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="order" element={<Order />} />
+        <Route path="purchases" element={<Purchase />} />
+        <Route path="customers" element={<Customers />} />
+        <Route path="reports" element={<Reports />} />
+        <Route path="promotions" element={<Promotions />} />
       </Route>
 
       {/* Fallback Route */}

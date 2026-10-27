@@ -5,6 +5,10 @@ import {
   BookOpen,
   LayoutDashboard,
   ShoppingCart,
+  Users,
+  Package,
+  ChartNoAxesCombined,
+  TicketPercent,
   LogOut,
   Sparkles,
 } from "lucide-react";
@@ -23,6 +27,26 @@ const menuItems = [
     key: "/admin/order",
     icon: <ShoppingCart className="w-4 h-4" />,
     label: "Đơn hàng",
+  },
+  {
+    key: "/admin/purchases",
+    icon: <Package className="w-4 h-4" />,
+    label: "Nhập hàng",
+  },
+  {
+    key: "/admin/customers",
+    icon: <Users className="w-4 h-4" />,
+    label: "Khách hàng",
+  },
+  {
+    key: "/admin/promotions",
+    icon: <TicketPercent className="w-4 h-4" />,
+    label: "Khuyến mãi",
+  },
+  {
+    key: "/admin/reports",
+    icon: <ChartNoAxesCombined className="w-4 h-4" />,
+    label: "Báo cáo",
   },
 ];
 
@@ -75,7 +99,13 @@ function AdminLayout() {
               Quản trị hệ thống
             </p>
             <h2 className="text-xl font-bold text-gray-800 m-0">
-              {location.pathname.includes("order") ? "Đơn hàng" : "Dashboard"}
+              {{
+                "/admin/order": "Đơn hàng",
+                "/admin/purchases": "Nhập hàng",
+                "/admin/customers": "Khách hàng",
+                "/admin/promotions": "Khuyến mãi",
+                "/admin/reports": "Báo cáo & thống kê",
+              }[location.pathname] || "Dashboard"}
             </h2>
           </div>
 

@@ -1,4 +1,10 @@
 services:
+  redis:
+    image: redis:7-alpine
+    container_name: bookhouse-redis
+    ports:
+      - "6379:6379"
+
   postgres:
     image: pgvector/pgvector:pg17
     container_name: bookhouse-postgres1
@@ -19,10 +25,12 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
+      SPRING_DATA_REDIS_HOST: redis
     ports:
       - "8080:8080"
     depends_on:
       - postgres
+      - redis
 
   frontend:
     build: ./Bookshop

@@ -17,6 +17,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -46,11 +47,13 @@ public class SachServiceImpl extends AbstractCrudServiceImpl<Sach, Integer> impl
     }
 
     @Override
+    @CacheEvict(cacheNames = {"catalog-books", "catalog-book-by-id", "catalog-search", "catalog-top-selling"}, allEntries = true)
     public Sach create(Sach sach) {
         return create(sach, null);
     }
 
     @Override
+    @CacheEvict(cacheNames = {"catalog-books", "catalog-book-by-id", "catalog-search", "catalog-top-selling"}, allEntries = true)
     public Sach create(Sach sach, MultipartFile fileAnh) {
         if (sach == null) {
             throw new IllegalArgumentException("Dữ liệu sách không được null");
@@ -69,6 +72,7 @@ public class SachServiceImpl extends AbstractCrudServiceImpl<Sach, Integer> impl
     }
 
     @Override
+    @CacheEvict(cacheNames = {"catalog-books", "catalog-book-by-id", "catalog-search", "catalog-top-selling"}, allEntries = true)
     public Optional<Sach> update(Integer id, Sach sach) {
         if (sach == null) {
             throw new IllegalArgumentException("Dữ liệu sách không được null");
@@ -97,6 +101,13 @@ public class SachServiceImpl extends AbstractCrudServiceImpl<Sach, Integer> impl
     }
 
     @Override
+    @CacheEvict(cacheNames = {"catalog-books", "catalog-book-by-id", "catalog-search", "catalog-top-selling"}, allEntries = true)
+    public boolean delete(Integer id) {
+        return super.delete(id);
+    }
+
+    @Override
+    @CacheEvict(cacheNames = {"catalog-books", "catalog-book-by-id", "catalog-search", "catalog-top-selling"}, allEntries = true)
     public Optional<Sach> update(Integer id, Sach sach, MultipartFile fileAnh) {
         if (sach == null) {
             throw new IllegalArgumentException("Dữ liệu sách không được null");
